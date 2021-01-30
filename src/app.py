@@ -1,15 +1,19 @@
 from flask import Flask, request, make_response, jsonify
 import os, time
 import numpy as np
-from tools.download_model import download
-from tools.inference import classify
+from tools.load_models import load
+from tools.inference import classify, classify_with_quantified
 from flask_cors import CORS
 
-res_net, mobile_net, x_ception = download()
+from tools.load_models import load
 
-model = res_net
+models = load()
 
 supported_types = ['jpg', 'png'] 
+# still hardcode for testing
+# model = models["resnet50"]
+
+model = models["resnet50_float16"]
 
 app = Flask(__name__) 
 
@@ -47,7 +51,7 @@ def testPost():
             uploadpath = address(filename) 
             f.save(uploadpath) 
  
-            pred, t = classify(uploadpath, model) 
+            pred, t = classify_with_quantified(uploadpath, model)  # classify(uploadpath, model)  
 
             print(pred, t)
             
