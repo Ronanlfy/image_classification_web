@@ -1,8 +1,15 @@
 from flask import Flask, request, make_response, jsonify
 import os, time
 import numpy as np
-
+from tools.download_model import download
+from tools.inference import classify
 from flask_cors import CORS
+
+res_net, mobile_net, x_ception = download()
+
+model = res_net
+
+supported_types = ['jpg', 'png'] 
 
 app = Flask(__name__) 
 
@@ -30,13 +37,29 @@ def test():
  
 @app.route('/testPost', methods=['POST'])
 def testPost():
-    print('POST')
 
     f = request.files['file']
-    uploadpath = address(f.filename) 
-    f.save(uploadpath)
+    if not os.path.exists(uploadDir):
+            os.makedirs(uploadDir) 
+    if f:
+        filename = f.filename
+        if filename.split('.')[-1] in supported_types:
+            uploadpath = address(filename) 
+            f.save(uploadpath) 
+ 
+            pred, t = classify(uploadpath, model) 
 
-    res = make_response(jsonify({"message": "OK"}), 200)
+            print(pred, t)
+            
+            _, prediction, probability = pred[0][0]
+
+            res = make_response(jsonify({"status": "SUCCESS", "prediction": str(prediction), 
+                                    "likelihood": str(probability), "used_time": str(t)}), 200)
+        else:
+            res = make_response(jsonify({"status": "FAIL", "msg": "Unspported image file format"}), 406)
+    else:
+        res = make_response(jsonify({"status": "FAIL", "msg": "No file uploaded"}), 400)
+
     return res
 
 if __name__ == '__main__':
