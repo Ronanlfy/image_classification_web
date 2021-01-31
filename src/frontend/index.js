@@ -1,5 +1,52 @@
 // Model selection dropdown
 
+function updateModelPickedList(){
+    model_pick_elements = document.getElementsByClassName("model_pick");
+    for(var i = 0; i < model_pick_elements.length; i++){
+        var model_pick_element = model_pick_elements[i];
+        model_pick_element.addEventListener("click",  function() {
+            var value = this.text;
+            console.log("Model picked " + value);
+        });
+    }
+}
+
+// Populate model selection list
+function populateModelList(model_list){
+    var element = document.getElementById("modelDropdown");
+
+    for (var i = 0; i < model_list["models"].length; i++){
+        var para = document.createElement("a");
+        para.className = "model_pick";
+        var node = document.createTextNode(model_list["models"][i]);
+        para.appendChild(node);
+
+        element.appendChild(para);
+    }
+
+    updateModelPickedList();
+}
+
+// Get model list
+const fetchModelList = async () => {
+    const response = await fetch('http://127.0.0.1:5000/list_model',{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'credentials': "include",
+            'Origin': 'http://localhost:5500/'
+            }
+    })
+    .then((response) => response.json())
+    .then((responseData) => {
+          console.log(responseData);
+          populateModelList(responseData);
+        })
+        .catch(error => console.warn(error));
+}
+
+fetchModelList();
+
 /* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 function myFunction() {
