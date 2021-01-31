@@ -1,3 +1,4 @@
+// define model as a global variable
 var model;
 
 function updateModelPickedList(){
@@ -84,6 +85,8 @@ inpFile.addEventListener("change", function() {
 
         previewDefaultText.style.display = "none";
         previewImage.style.display = "block";
+        
+        document.getElementById("resultText").innerHTML = `Running prediction ...`;
 
         reader.addEventListener("load", function(){
             previewImage.setAttribute("src", this.result);
@@ -109,7 +112,7 @@ inpFile.addEventListener("change", function() {
 
                         response.json().then(function(body){
                             console.log(body);
-                            var result_str = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']}`;
+                            var result_str = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']} seconds`;
                             document.getElementById("resultText").innerHTML = result_str;
                         });
 
