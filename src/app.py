@@ -1,8 +1,8 @@
 from flask import Flask, request, make_response, jsonify
+from werkzeug.utils import secure_filename
 import os, time
-import numpy as np
 from tools.load_models import load
-from tools.inference import classify, classify_with_quantified
+from tools.inference import classify
 from flask_cors import CORS
 
 from tools.load_models import load
@@ -29,11 +29,11 @@ def address(filename):
 
 @app.route('/')
 def index():
-    return {'Value' : 'Welcome'}
+    return 'Welcome!'
 
 @app.route('/test', methods=['GET'])
 def test():
-    return {'Value' : 'Hello World'}
+    return 'Just a test!'
 
 @app.route('/list_model', methods=['GET'])
 def list_model():
@@ -44,8 +44,8 @@ def list_model():
     
     return make_response(jsonify({"models": supported_models}), 200)
 
-@app.route('/testPost', methods=['POST'])
-def testPost():
+@app.route('/post_image', methods=['POST'])
+def post_image():
 
     f = request.files['file']
     if not os.path.exists(uploadDir):
@@ -53,12 +53,12 @@ def testPost():
     if f:
         filename = f.filename
         if filename.split('.')[-1] in supported_types:
+
+            filename = secure_filename(filename)
             uploadpath = address(filename) 
             f.save(uploadpath) 
 
-            #TODO: get the which model to run prediction
-            # chosen_model = request.body["model"]
-            chosen_model = "mobilenet_int8"
+            chosen_model = request.form['model_name']
 
             pred, t = classify(uploadpath, chosen_model, models[chosen_model]) 
             

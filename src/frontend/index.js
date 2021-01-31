@@ -1,4 +1,4 @@
-// Model selection dropdown
+var model;
 
 function updateModelPickedList(){
     model_pick_elements = document.getElementsByClassName("model_pick");
@@ -7,13 +7,14 @@ function updateModelPickedList(){
         model_pick_element.addEventListener("click",  function() {
             var value = this.text;
             console.log("Model picked " + value);
+            model = value;
         });
     }
 }
 
 // Populate model selection list
 function populateModelList(model_list){
-    var element = document.getElementById("modelDropdown");
+    var dropdown_element = document.getElementById("modelDropdown");
 
     for (var i = 0; i < model_list["models"].length; i++){
         var para = document.createElement("a");
@@ -21,7 +22,7 @@ function populateModelList(model_list){
         var node = document.createTextNode(model_list["models"][i]);
         para.appendChild(node);
 
-        element.appendChild(para);
+        dropdown_element.appendChild(para);
     }
 
     updateModelPickedList();
@@ -69,15 +70,16 @@ window.onclick = function(event) {
 
 // Image uploading
 
-let inpFile = document.getElementById("inputFile");
+const inpFile = document.getElementById("inputFile");
 const previewContainer = document.getElementById("imagePreview");
 const previewImage = previewContainer.querySelector(".image_preview_image");
 const previewDefaultText = previewContainer.querySelector(".image_preview_default_text");
 
 inpFile.addEventListener("change", function() {
-    let file = this.files[0];
+    const file = this.files[0];
 
     if(file){
+        console.log("Using model: " + model);
         const reader = new FileReader();
 
         previewDefaultText.style.display = "none";
@@ -87,12 +89,13 @@ inpFile.addEventListener("change", function() {
             previewImage.setAttribute("src", this.result);
 
             let data = new FormData();
+            data.append('model_name', model);
             data.append('file', file);
 
             const postImage = async() => {
-                const response = await fetch('http://127.0.0.1:5000/testPost',{
+                const response = await fetch('http://127.0.0.1:5000/post_image',{
                     method: 'POST',
-                    body: data,
+                    body : data,
                     headers: {
                         'credentials': "same-origin",
                         'Origin': 'http://localhost:5500/'
@@ -101,27 +104,20 @@ inpFile.addEventListener("change", function() {
                 .then(function(response) {
                     if (response.status !== 200)
                         console.log(`Status code: ${response.status}, error message ${response.body}`);
-                    else
-                        console.log(`Posted sucessfully, ${response.body}`);
+                    else{
+                        console.log("Got response");
+
+                        response.json().then(function(body){
+                            console.log(body);
+                            var result_str = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']}`;
+                            document.getElementById("resultText").innerHTML = result_str;
+                        });
+
+                    }
                 });
             }
             postImage();
             
-
-            // const userAction = async () => {
-            //     const response = await fetch('http://127.0.0.1:5000/test',{
-            //         method: 'GET',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'credentials': "include",
-            //             'Origin': 'http://localhost:5500/'
-            //           }
-            //     });
-            //     console.log("waiting");
-            //     const myJson = await response.json();
-            //     console.log(myJson);
-            // }
-            // userAction();
         });
 
         reader.readAsDataURL(file);

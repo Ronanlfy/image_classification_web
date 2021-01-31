@@ -42,7 +42,7 @@ if __name__ == "__main__":
     tflite_models_dir.mkdir(exist_ok=True, parents=True)
 
     quantize_level = {"int8": tf.lite.OpsSet.TFLITE_BUILTINS_INT8, 
-                      #"float16": tf.float16
+                      "float16": tf.float16
                       }
 
     for model in models:
