@@ -10,10 +10,6 @@ from tools.load_models import load
 models = load()
 
 supported_types = ['jpg', 'png'] 
-# still hardcode for testing
-# model = models["resnet50"]
-
-model = models["resnet50_float16"]
 
 app = Flask(__name__) 
 
@@ -38,7 +34,16 @@ def index():
 @app.route('/test', methods=['GET'])
 def test():
     return {'Value' : 'Hello World'}
- 
+
+@app.route('/list_model', methods=['GET'])
+def list_model():
+
+    supported_models = []
+    for m in models:
+        supported_models.append(m)
+    
+    return make_response(jsonify({"models": supported_models}), 200)
+
 @app.route('/testPost', methods=['POST'])
 def testPost():
 
@@ -50,11 +55,14 @@ def testPost():
         if filename.split('.')[-1] in supported_types:
             uploadpath = address(filename) 
             f.save(uploadpath) 
- 
-            pred, t = classify_with_quantified(uploadpath, model)  # classify(uploadpath, model)  
 
-            print(pred, t)
+            #TODO: get the which model to run prediction
+            # chosen_model = request.body["model"]
+            chosen_model = "mobilenet_int8"
+
+            pred, t = classify(uploadpath, chosen_model, models[chosen_model]) 
             
+            print(pred, t)
             _, prediction, probability = pred[0][0]
 
             res = make_response(jsonify({"status": "SUCCESS", "prediction": str(prediction), 

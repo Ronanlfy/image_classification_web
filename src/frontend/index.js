@@ -1,3 +1,25 @@
+// Model selection dropdown
+
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+    document.getElementById("modelDropdown").classList.toggle("show");
+}
+  
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+        var dropdowns = document.getElementsByClassName("model_selection_dropdown_content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+}
+
 // Image uploading
 
 let inpFile = document.getElementById("inputFile");
@@ -23,7 +45,6 @@ inpFile.addEventListener("change", function() {
             const postImage = async() => {
                 const response = await fetch('http://127.0.0.1:5000/testPost',{
                     method: 'POST',
-                    // body: JSON.stringify(this.result),
                     body: data,
                     headers: {
                         'credentials': "same-origin",
@@ -37,7 +58,6 @@ inpFile.addEventListener("change", function() {
                         console.log(`Posted sucessfully, ${response.body}`);
                 });
             }
-
             postImage();
             
 
