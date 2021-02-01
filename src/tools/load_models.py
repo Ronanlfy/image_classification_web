@@ -3,7 +3,11 @@ import os
 import tensorflow as tf
 
 def load():
+    """function to load all models
 
+    Returns:
+        [dict]: {"$modelname": model_object}
+    """
     models = {}
 
     res_net, mobile_net, x_ception = download(model_dict=models)

@@ -105,17 +105,18 @@ inpFile.addEventListener("change", function() {
                     }
                 })
                 .then(function(response) {
-                    if (response.status !== 200)
-                        console.log(`Status code: ${response.status}, error message ${response.body}`);
+                    if (response.status !== 200){
+                        response.json().then(function(body){
+                            console.log(`Status code: ${response.status}, error message ${body["msg"]}`);
+                            document.getElementById("resultText").innerHTML = body["msg"];
+                        });
+                    }
                     else{
                         console.log("Got response");
-
                         response.json().then(function(body){
                             console.log(body);
-                            var result_str = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']} seconds`;
-                            document.getElementById("resultText").innerHTML = result_str;
+                            document.getElementById("resultText").innerHTML = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']} seconds`;
                         });
-
                     }
                 });
             }
