@@ -56,10 +56,10 @@ For frontend:
 
 1. Display which model user chose in frontend
 
-2. display prediction result in a table.
+2. Add some logic in frontend, like first choose model and then upload image
 
 3. A better structure on the page
 
 For backend:
 
-Try with Pruning.
+Try with Pruning if possible.
