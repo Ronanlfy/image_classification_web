@@ -1,14 +1,21 @@
-// define model as a global variable
+// Global elements
+const imageUploadContainer = document.getElementById("imageUploadAndPreview");
+
+// Global variables
 var model;
+var data;
 
 function updateModelPickedList(){
     model_pick_elements = document.getElementsByClassName("model_pick");
+    var dropdown_btn_element = document.getElementById("modelDropdownBtn");
     for(var i = 0; i < model_pick_elements.length; i++){
         var model_pick_element = model_pick_elements[i];
         model_pick_element.addEventListener("click",  function() {
             var value = this.text;
             console.log("Model picked " + value);
             model = value;
+            dropdown_btn_element.innerHTML = value;
+            imageUploadContainer.style.display = "block";
         });
     }
 }
@@ -51,7 +58,7 @@ fetchModelList();
 
 /* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
-function myFunction() {
+function modelDropdown() {
     document.getElementById("modelDropdown").classList.toggle("show");
 }
   
@@ -59,8 +66,7 @@ function myFunction() {
 window.onclick = function(event) {
     if (!event.target.matches('.dropbtn')) {
         var dropdowns = document.getElementsByClassName("model_selection_dropdown_content");
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
+        for (var i = 0; i < dropdowns.length; i++) {
             var openDropdown = dropdowns[i];
             if (openDropdown.classList.contains('show')) {
                 openDropdown.classList.remove('show');
@@ -70,11 +76,40 @@ window.onclick = function(event) {
 }
 
 // Image uploading
-
 const inpFile = document.getElementById("inputFile");
 const previewContainer = document.getElementById("imagePreview");
 const previewImage = previewContainer.querySelector(".image_preview_image");
 const previewDefaultText = previewContainer.querySelector(".image_preview_default_text");
+
+function uploadImage() {
+    const postImage = async() => {
+        const response = await fetch('http://127.0.0.1:5000/post_image',{
+            method: 'POST',
+            body : data,
+            headers: {
+                'credentials': "same-origin",
+                'Origin': 'http://localhost:5500/'
+            }
+        })
+        .then(function(response) {
+            if (response.status !== 200){
+                response.json().then(function(body){
+                    console.log(`Status code: ${response.status}, error message ${body["msg"]}`);
+                    document.getElementById("resultText").innerHTML = body["msg"];
+                });
+            }
+            else{
+                console.log("Got response");
+                response.json().then(function(body){
+                    console.log(body);
+                    document.getElementById("resultText").innerHTML = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']} seconds`;
+                });
+            }
+        });
+    }
+    postImage();
+    document.getElementById("resultText").innerHTML = `Running prediction ...`;
+}
 
 inpFile.addEventListener("change", function() {
     const file = this.files[0];
@@ -85,43 +120,13 @@ inpFile.addEventListener("change", function() {
 
         previewDefaultText.style.display = "none";
         previewImage.style.display = "block";
-        
-        document.getElementById("resultText").innerHTML = `Running prediction ...`;
 
         reader.addEventListener("load", function(){
             previewImage.setAttribute("src", this.result);
 
-            let data = new FormData();
+            data = new FormData();
             data.append('model_name', model);
             data.append('file', file);
-
-            const postImage = async() => {
-                const response = await fetch('http://127.0.0.1:5000/post_image',{
-                    method: 'POST',
-                    body : data,
-                    headers: {
-                        'credentials': "same-origin",
-                        'Origin': 'http://localhost:5500/'
-                    }
-                })
-                .then(function(response) {
-                    if (response.status !== 200){
-                        response.json().then(function(body){
-                            console.log(`Status code: ${response.status}, error message ${body["msg"]}`);
-                            document.getElementById("resultText").innerHTML = body["msg"];
-                        });
-                    }
-                    else{
-                        console.log("Got response");
-                        response.json().then(function(body){
-                            console.log(body);
-                            document.getElementById("resultText").innerHTML = `Prediction: ${body['prediction']}, Probability: ${body['likelihood']}, Time: ${body['used_time']} seconds`;
-                        });
-                    }
-                });
-            }
-            postImage();
-            
         });
 
         reader.readAsDataURL(file);
