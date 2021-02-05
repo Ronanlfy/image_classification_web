@@ -15,12 +15,11 @@ session = tf.compat.v1.Session(config=config)
 tf.compat.v1.keras.backend.set_session(session)
 ###################################
 
-# use both GPU to do training
 mirrored_strategy = tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1"])
 
 from tensorflow.keras import layers, optimizers, losses, callbacks
 import numpy as np
-import os
+import os, time
 import tensorflow_model_optimization as tfmot
 from tensorflow.keras.applications.mobilenet import MobileNet
 from tensorflow.keras.applications.imagenet_utils import preprocess_input
@@ -66,7 +65,6 @@ with mirrored_strategy.scope():
     output_shape = ((batch_size, *model.input_shape[1:]), (batch_size, n_classes))
     output_type = (tf.float32, tf.int32)
 
-    # build training and evaluation generator
     gen_tr = representative_data_gen(model.input_shape[1:-1], "mobilenet", ds_tr, size=train_size)
     training_generator = gen_tr.generator
     training_tf_generator = tf.data.Dataset.from_generator(training_generator, output_shapes=output_shape, output_types=output_type).take(train_size // batch_size)
@@ -77,18 +75,19 @@ with mirrored_strategy.scope():
 
     model.compile(optimizer=optimizers.Adam(lr=0.001), 
                 loss='categorical_crossentropy', metrics=['accuracy'])
-    
-    # get the result from baseline model
+
+    start_time = time.time()
     train_acc = model.evaluate(training_tf_generator, workers=64,
                use_multiprocessing=True)
+    end_time1 = time.time()
     val_acc = model.evaluate(val_tf_generator, workers=64,
                use_multiprocessing=True)
-
+    end_time2 = time.time()
     with open("result.log", "w") as f:
 
-        f.write("original model performance, train acc {}, val acc {}\n".format(train_acc[1], val_acc[1]))
+        f.write("original model performance, train acc {}, use time {}, val acc {}, use_time {}\n".format(
+                    train_acc[1], end_time1-start_time, val_acc[1], end_time2-end_time1))
 
-    # define the pruning 
     prune_low_magnitude = tfmot.sparsity.keras.prune_low_magnitude
 
     end_step = np.ceil(train_size / batch_size).astype(np.int32) * epochs
@@ -110,7 +109,6 @@ with mirrored_strategy.scope():
     logdir = "./logs"
     os.makedirs(logdir, exist_ok=True)
 
-    # start training /pruning awared training
     output_path = os.path.join(logdir, "model_checkpoint.h5")
     callback = [
     tfmot.sparsity.keras.UpdatePruningStep(),
@@ -135,13 +133,15 @@ with mirrored_strategy.scope():
     model_pruned.compile(optimizer=optimizers.Adam(lr=2e-5), 
                 loss='categorical_crossentropy', metrics=['accuracy'])
 
-    # run throught training and evaluation data for benchmarking
+    start_time = time.time()
     train_acc_prune = model_pruned.evaluate(training_tf_generator, workers=64,
                use_multiprocessing=True)
+    end_time1 = time.time()
     val_acc_prune = model_pruned.evaluate(val_tf_generator, workers=64,
                use_multiprocessing=True)
+    end_time2 = time.time()
 
     with open("result.log", "a") as f:
 
-        f.write("pruned model performance, train acc {}, val acc {}\n".format(train_acc_prune[1], val_acc_prune[1]))
-
+        f.write("pruned model performance, train acc {}, use time {}, val acc {}, use_time {}\n".format(
+                    train_acc_prune[1], end_time1-start_time, val_acc_prune[1], end_time2-end_time1))
