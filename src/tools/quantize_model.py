@@ -2,6 +2,7 @@ import tensorflow as tf
 from download_model import download
 import pathlib
 import tensorflow_datasets as tfds
+from preprocessing import process
 
 ds = tfds.load('imagenet2012_subset/1pct', split="train")
 
