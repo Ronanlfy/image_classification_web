@@ -36,12 +36,12 @@ Build frontend where user can choose model and image to run prediction with, and
 
 ### Result ###
 
-This chart is obtained from running prediction on win10 once. It displays the probablity (for original and float16 models) and running time to predict a given image. So depends on the hardware, result on running time might vary a lot:
+This chart is obtained from running prediction on win10 once. It displays the probablity (for original and float16 models) and running time to predict a given image. So depends on the hardware, result on running time might vary a lot for each run:
 
 | images \ prediction, time (seconds) | Resnet | Resnet float16 | Resnet int8 | Xception | Xception float16 | Xception int8 | mobilenet | mobilenet float16 | mobilenet int8 |
 | -----:|------:| -----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-|images/test_images/cat.png  | tabby, 0.89s|tabby, 0.66s| tabby, 47s|tabby, 1.07s|tabby, 1.6s|tabby, 282s|tabby, 0.68s|tabby, 0.56s|tabby, 7.5s|
-|images/test_images/dog.png     | Great_Pyrenees, 0.47s|Great_Pyrenees, 0.36s|Great_Pyrenees, 45s|white_wolf, 0.57s|white_wolf, 1.4s| white_wolf, 253s|Eskimo_dog, 0.34s|Eskimo_dog, 0.17s|Eskimo_dog, 5.8s|
+|images/test_images/cat.png  | tabby, 0.89s|tabby, 0.66s| tabby, 47s|tabby, 1.07s|tabby, 0.69s|tabby, 282s|tabby, 0.68s|tabby, 0.56s|tabby, 7.5s|
+|images/test_images/dog.png     | Great_Pyrenees, 0.47s|Great_Pyrenees, 0.36s|Great_Pyrenees, 45s|white_wolf, 0.57s|white_wolf, 0.55s| white_wolf, 253s|Eskimo_dog, 0.34s|Eskimo_dog, 0.17s|Eskimo_dog, 5.8s|
 
 Int8 models run pretty slow, which might be expected since tflite is more optimized on mobile/embedded (e.g. arm). Check out more discussions [here](https://github.com/tensorflow/tensorflow/issues/40183).
 
@@ -65,38 +65,42 @@ For backend:
 
 ### Frontend ###
 
-Achieve 3 points in previous section about left to do. Now frontend will display which model is chosen, and also results in a table with top 5 accuracy, as shown below.
+Achieve 3 points about left to do in previous section. Now frontend will display which model is chosen, and also results are available in a table with top 5 accuracy, as shown below.
 
 ![frontend](images/frontend/frontend_2.png)
 
 ### Backend ###
 
-A pruning scripts (src/tools/pruning.py) is added to run some pruning with MobileNet on imagenet2012 dataset. And the idea of pruning is trying to push network weights to be sparse / zero, which will decrease the size of the model. 
+Apply pruning on MobileNet and retrain on imagenet2012 dataset. And the idea of pruning is trying to push network weights to be sparse / zero, which will decrease the size of the model. 
 
 ### Result ###
 
-We use original mobilenet and pruned one to run through the whole imagenet validation dataset with 50000 images:
+We evaluate original mobilenet and pruned mobilenet on 800000 images from imagenet train (66%) and 50000 images from validation dataset (100%):
 
-| model | accuracy | used time | compressed size | 
-| -----:|------:| -----:|-----:|
-| Original MobileNet  | 0.6917 |228s| 15471k|
-| Pruned MobileNet   |   |  |  |
+| model | accuracy/train| used time/train | accuracy/validation| used time/validation | compressed size | 
+| -----:|------:| -----:|-----:|-----:|-----:|
+| Original MobileNet  | 0.8711 | 3043 s | 0.6917 |228 s| 15471 KB|
+| Pruned MobileNet   |  0.8781 | 2711 s | 0.6733 | 204 s| 8807 KB|
+
+So after pruning, the time used to run slightly decreases, accuracy on validation set drops a bit. Interesting to see that the compressed size is just half of the original, which matches with our pruning goal (initial sparsity is 50%). Moreover, it is possible to have a 8x smaller model if combining pruning and quantization, 
+
+## Summary ##
 
 ## To Be Notice ##
 
-if want run `/src/tools/quantize_model.py` or `/src/tools/pruning.py`
+if want to run `/src/tools/quantize_model.py` or `/src/tools/pruning.py`
 
-1. replace `/src/tools/schema_py_generated.py` under your virtualenv site-packages/tensorflow/lite/python
+1. replace `/src/tools/schema_py_generated.py` under your python virtualenv `site-packages/tensorflow/lite/python`
 
-2. download imagenet 2012 dataset manually from [imagenet](http://www.image-net.org/challenges/LSVRC/2012/downloads) and place under ~/tensorflow_datasets/downloads/manual/
-
+2. download imagenet 2012 dataset manually from [imagenet](http://www.image-net.org/challenges/LSVRC/2012/downloads) and place under `~/tensorflow_datasets/downloads/manual/`
 
 ## Obstacles ##
 
-1. whole web design is new to me
+1. whole web design is new
    
 2. preprocessing method is different from model to model
 
 3. quantize to int models are tricky when prepare representative dataset
 
-4. Download imagenets and run with such big dataset.
+4. download imagenets and run with such big dataset
+
