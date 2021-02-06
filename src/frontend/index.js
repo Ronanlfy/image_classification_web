@@ -176,6 +176,8 @@ inpFile.addEventListener("change", function() {
         previewDefaultText.style.display = null;
         previewImage.style.display = null;
         previewImage.setAttribute("src", "");
+        resultTable.style.display = "none";
+        document.getElementById("resultText").style.display = "none";
     }
 
     console.log(file)
