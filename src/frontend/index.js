@@ -117,15 +117,15 @@ function uploadImage() {
     document.getElementById("resultText").style.display = "block"; 
 
     function tableCreate(label, score){
-        
+        // clean up the old table
         while(resultTable.hasChildNodes())
         {
             resultTable.removeChild(resultTable.firstChild);
         }
 
         var columns = ["#", "Label", "Score"];
-
-        for(var i = 0; i < 6; i++){
+        // create new table 
+        for(var i = 0; i < label.length+1; i++){
             var tr = resultTable.insertRow();
             for(var j = 0; j < 3; j++){
                 if(i == 0){
@@ -139,7 +139,7 @@ function uploadImage() {
                 else if(j == 1){
                     td.appendChild(document.createTextNode(label[i-1]));
                 }else{
-                    td.appendChild(document.createTextNode(score[i-1]));
+                    td.appendChild(document.createTextNode(score[i-1].substring(0,5)));
                 }
             }
             td.style.border = '1px solid black';

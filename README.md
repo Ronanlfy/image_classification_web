@@ -26,8 +26,8 @@ This chart is obtained from running prediction on win10 once. It displays the pr
 
 | images \ prediction, time (seconds) | Resnet | Resnet float16 | Resnet int8 | Xception | Xception float16 | Xception int8 | mobilenet | mobilenet float16 | mobilenet int8 |
 | -----:|------:| -----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-|test_images/cat.png  | tabby, 0.89s|tabby, 0.66s| tabby, 122s|tabby, 1.07s|tabby, 1.6s|tabby, 282s|tabby, 0.68s|tabby, 0.56s|tabby, 20s|
-|test_images/dog.png     | Great_Pyrenees, 0.47s|Great_Pyrenees, 0.36s|Great_Pyrenees, 145s|white_wolf, 0.57s|white_wolf, 1.4s| white_wolf, 253s|Eskimo_dog, 0.34s|Eskimo_dog, 0.17s|Eskimo_dog, 23s|
+|test_images/cat.png  | tabby, 0.89s|tabby, 0.66s| tabby, 47s|tabby, 1.07s|tabby, 1.6s|tabby, 282s|tabby, 0.68s|tabby, 0.56s|tabby, 7.5s|
+|test_images/dog.png     | Great_Pyrenees, 0.47s|Great_Pyrenees, 0.36s|Great_Pyrenees, 45s|white_wolf, 0.57s|white_wolf, 1.4s| white_wolf, 253s|Eskimo_dog, 0.34s|Eskimo_dog, 0.17s|Eskimo_dog, 5.8s|
 
 Int8 models run pretty slow, which might be expected since tflite is more optimized on mobile/embedded (e.g. arm). Check out more discussions [here](https://github.com/tensorflow/tensorflow/issues/40183).
 
@@ -58,8 +58,21 @@ For frontend:
 
 2. Add some logic in frontend, like first choose model and then upload image
 
-3. A better structure on the page
+3. Dsiplay result on a table with Top 5 accuracy
 
 For backend:
 
 Try with Pruning if possible.
+
+## week2 progress ##
+
+
+### frontend ###
+
+Now frontend will display which model is chosen, and also results in a table with top 5 accuracy, as shown below. And also some logics with choosing model and images. 
+
+![frontend](frontend_2.png)
+
+### backend ###
+
+A pruning scripts (src/tools/pruning.py) is added to run some pruning with MobileNet on imagenet2012 dataset. And the idea of pruning is trying to push network weights to be sparse / zero, which will decrease the size of the model. 

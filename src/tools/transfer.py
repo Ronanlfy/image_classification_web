@@ -1,4 +1,10 @@
 
+"""
+This file is trying to do some transfer learning with mobilnet on cifar dataset. The reason is the
+the concern of run pruning on original imagenet dataset will take too long. But eventually pruning 
+with imagenet finishes, so this file is deprecated and retrained model is not used in the project.
+
+"""
 import tensorflow as tf
 from tensorflow.keras.applications.resnet50 import ResNet50
 from tensorflow.keras import layers, optimizers, losses, callbacks

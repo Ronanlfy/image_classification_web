@@ -1,3 +1,11 @@
+"""
+This file is trying to run some pruning with mobilenet. This file will take 
+roughly 10 hours to run.  
+
+Requires: Manual download imagenet2012 train and validation dataset (around 160GB).
+
+"""
+
 import tensorflow as tf
 
 ##################################
