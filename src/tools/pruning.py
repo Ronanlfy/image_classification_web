@@ -131,7 +131,6 @@ with mirrored_strategy.scope():
 
     print("pruned performance with {} parameters".format(model_for_pruning.count_params()))
 
-    model_for_pruning = tf.keras.models.load_model(output_path)
     model_for_export = tfmot.sparsity.keras.strip_pruning(model_for_pruning)
 
     pruned_keras_file = "pruned_mobilenet.h5"
