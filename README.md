@@ -1,6 +1,6 @@
 # web_classification
 
-This repo is to set up a simple web page to run oneline image classification. It includes a frontend (built in .js) and a backend (built with python, Flask), communicating through rest API. Frontend will display all supported models and upload image to backend to run prediction. And the backend is reponsible for preprocessing, model prediction and return result.
+This repo is to set up a simple web page to run oneline image classification. And it focuses on a speeding up inference with quantization and model pruning. It includes a frontend (built in .js) and a backend (built with python, Flask), communicating through rest API. Frontend will display all supported models and upload image to backend to run prediction. And the backend is reponsible for preprocessing, model prediction and return result.
 
 ## Setup ##
 
@@ -84,17 +84,13 @@ We evaluate original mobilenet and pruned mobilenet on 800000 images from imagen
 
 So after pruning, the time used to run evaluation slightly decreases, accuracy on validation set drops a bit. Interesting to see that the compressed size becomes hafl smaller after pruning, which matches with our pruning goal (initial sparsity is 50%). Moreover, this indicates that it is possible to have a 8x smaller model if combining pruning and quantization. 
 
-## END ##
+## Summary ##
 
-## To Be Notice ##
+### Why chosen this solution ###
 
-if want to run `/src/tools/quantize_model.py` or `/src/tools/pruning.py`
+The reason I chose speeding up forward pass is that I feel this one is more fun and more related to my previous experience. And I chose to build all things from scratch in frontend is because I want to learn some basic about web development. And reason setting up Flask backend instead of using tensorflow-js is that I do not want to convert every model I developed and convert in .js, which takes time to get feedback on the model performance. But of course, the drawback of this approach is that it requires more time to think and develop.
 
-1. replace `/src/tools/schema_py_generated.py` under your python virtualenv `site-packages/tensorflow/lite/python`
-
-2. download imagenet 2012 dataset manually from [imagenet](http://www.image-net.org/challenges/LSVRC/2012/downloads) and place under `~/tensorflow_datasets/downloads/manual/`
-
-## Obstacles ##
+### Obstacles ###
 
 1. whole web design is new
    
@@ -103,4 +99,20 @@ if want to run `/src/tools/quantize_model.py` or `/src/tools/pruning.py`
 3. quantize to int models are tricky when prepare representative dataset
 
 4. download imagenets and run with such big dataset
+
+### Future Step ###
+
+1. More advanced and better tuning during the pruning, which could preserve or even improve model performances
+
+2. A better structure in the frontend
+
+3. Try with Tensorflow-model-server
+
+### To Be Notice ###
+
+if want to run `/src/tools/quantize_model.py` or `/src/tools/pruning.py`
+
+1. replace `/src/tools/schema_py_generated.py` under your python virtualenv `site-packages/tensorflow/lite/python`
+
+2. download imagenet 2012 dataset manually from [imagenet](http://www.image-net.org/challenges/LSVRC/2012/downloads) and place under `~/tensorflow_datasets/downloads/manual/`
 
