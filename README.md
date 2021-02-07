@@ -82,9 +82,9 @@ We evaluate original mobilenet and pruned mobilenet on 800000 images from imagen
 | Original MobileNet  | 0.8711 | 3043 s | 0.6917 |228 s| 15471 KB|
 | Pruned MobileNet   |  0.8781 | 2711 s | 0.6733 | 204 s| 8807 KB|
 
-So after pruning, the time used to run slightly decreases, accuracy on validation set drops a bit. Interesting to see that the compressed size is just half of the original, which matches with our pruning goal (initial sparsity is 50%). Moreover, it is possible to have a 8x smaller model if combining pruning and quantization, 
+So after pruning, the time used to run evaluation slightly decreases, accuracy on validation set drops a bit. Interesting to see that the compressed size becomes hafl smaller after pruning, which matches with our pruning goal (initial sparsity is 50%). Moreover, this indicates that it is possible to have a 8x smaller model if combining pruning and quantization. 
 
-## Summary ##
+## END ##
 
 ## To Be Notice ##
 

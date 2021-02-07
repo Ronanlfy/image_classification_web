@@ -1,6 +1,6 @@
 """
 This file is trying to run some pruning with mobilenet. This file will take 
-roughly 10 hours to run.  
+roughly 10 hours to run, hardware: 2 RTX 1080Ti GPU, 32 cores. 
 
 Requires: Manual download imagenet2012 train and validation dataset (around 160GB).
 
@@ -45,7 +45,7 @@ n_classes = 1000
 train_size = 800000
 validation_size = 50000
 
-class representative_data_gen():
+class data_gen():
     # to generate TF dataset for quantizing int8 models
     def __init__(self, shape, modelname, ds, size):
         self.shape = shape
@@ -65,7 +65,7 @@ class representative_data_gen():
                 if (count % batch_size == 0):
                     yield x, y
 
-
+# run with both GPU devices
 with mirrored_strategy.scope():
      
     model = MobileNet(weights='imagenet')
@@ -73,11 +73,12 @@ with mirrored_strategy.scope():
     output_shape = ((batch_size, *model.input_shape[1:]), (batch_size, n_classes))
     output_type = (tf.float32, tf.int32)
 
-    gen_tr = representative_data_gen(model.input_shape[1:-1], "mobilenet", ds_tr, size=train_size)
+
+    gen_tr = data_gen(model.input_shape[1:-1], "mobilenet", ds_tr, size=train_size)
     training_generator = gen_tr.generator
     training_tf_generator = tf.data.Dataset.from_generator(training_generator, output_shapes=output_shape, output_types=output_type).take(train_size // batch_size)
 
-    gen_val = representative_data_gen(model.input_shape[1:-1], "mobilenet", ds_val, size=validation_size)
+    gen_val = data_gen(model.input_shape[1:-1], "mobilenet", ds_val, size=validation_size)
     val_generator = gen_val.generator
     val_tf_generator = tf.data.Dataset.from_generator(val_generator, output_shapes=output_shape, output_types=output_type).take(validation_size // batch_size)
 
@@ -135,7 +136,8 @@ with mirrored_strategy.scope():
 
     pruned_keras_file = "pruned_mobilenet.h5"
     tf.keras.models.save_model(model_for_export, pruned_keras_file, include_optimizer=False)
-
+    
+    # recompile the model
     model_pruned = tf.keras.models.load_model(pruned_keras_file)
     model_pruned.compile(optimizer=optimizers.Adam(lr=2e-5), 
                 loss='categorical_crossentropy', metrics=['accuracy'])

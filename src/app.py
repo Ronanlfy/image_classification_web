@@ -1,3 +1,7 @@
+"""
+This is the Flask app as server, to run iamge predictions with different neural network models.
+"""
+
 from flask import Flask, request, make_response, jsonify
 from werkzeug.utils import secure_filename
 import os, time, logging
@@ -5,9 +9,11 @@ from tools.inference import classify
 from flask_cors import CORS
 from tools.load_models import load
 
+# load all models into memory
 models = load()
 
-supported_types = ['jpg', 'png'] 
+# specify supported image file format
+supported_types = ['jpg', 'png', 'jpeg'] 
 
 app = Flask(__name__) 
 
@@ -16,7 +22,6 @@ logging.basicConfig(filename='demo.log', level=logging.DEBUG,
 
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
 app.config['SECRET_KEY'] = os.urandom(24)
  
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -65,22 +70,22 @@ def post_image():
             filename = secure_filename(filename)
             uploadpath = address(filename) 
             f.save(uploadpath) 
-
+            # load corresponding model and run prediction
             chosen_model = request.form['model_name']
-
             label, score, t = classify(uploadpath, chosen_model, models[chosen_model]) 
             
             print(label, score, t)
 
             body = {"status": "SUCCESS", "label": label, "score": score, "used_time": str(t)}
-            
             res = make_response(body, 200)
         else:
+            # uploaded file format is not valid image 
             app.logger.info('Upload image file format is not supported.')
-            res = make_response(jsonify({"status": "FAIL", "msg": "Unspported image file format"}), 406)
+            res = make_response({"status": "FAIL", "msg": "Unspported image file format, reupload with .jpg, .jpeg, .png"}, 406)
     else:
+        # no file is uploaded
         app.logger.info('Upload image is empty.')
-        res = make_response(jsonify({"status": "FAIL", "msg": "No file uploaded"}), 400)
+        res = make_response({"status": "FAIL", "msg": "No file uploaded"}, 400)
 
     return res
 

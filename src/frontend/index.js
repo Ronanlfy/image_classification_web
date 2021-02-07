@@ -1,6 +1,8 @@
 // Global elements
 const imageUploadContainer = document.getElementById("imageUploadAndPreview");
+const resultText = document.getElementById('resultText');
 const resultTable = document.getElementById('resultTable');
+const inpFile = document.getElementById("inputFile");
 // Global variables
 var model;
 var data;
@@ -16,8 +18,13 @@ function updateModelPickedList(){
             model = value;
             dropdown_btn_element.innerHTML = value;
             imageUploadContainer.style.display = "block";
-
-            document.getElementById("resultText").style.display = "none";
+            // reset image if a different model is chosen
+            if (inpFile.value){
+                inpFile.value = "";
+            } 
+            // hide the resulttable and text
+            previewContainer.querySelector(".image_preview_image").style.display = "none";
+            resultText.style.display = "none";
             resultTable.style.display = "none";
         });
     }
@@ -79,7 +86,6 @@ window.onclick = function(event) {
 }
 
 // Image uploading
-const inpFile = document.getElementById("inputFile");
 const previewContainer = document.getElementById("imagePreview");
 const previewImage = previewContainer.querySelector(".image_preview_image");
 const previewDefaultText = previewContainer.querySelector(".image_preview_default_text");
@@ -98,14 +104,15 @@ function uploadImage() {
             if (response.status !== 200){
                 response.json().then(function(body){
                     console.log(`Status code: ${response.status}, error message ${body["msg"]}`);
-                    document.getElementById("resultText").innerHTML = body["msg"];
+                    resultText.innerHTML = body["msg"];
+
                 });
             }
             else{
                 console.log("Got response");
                 response.json().then(function(body){
                     console.log(body);
-                    document.getElementById("resultText").innerHTML = 'Results:';
+                    resultText.innerHTML = 'Results:';
                     tableCreate(body['label'], body['score']);
                     resultTable.style.display = "block";
                 });
@@ -114,7 +121,7 @@ function uploadImage() {
     }
     postImage();
 
-    document.getElementById("resultText").style.display = "block"; 
+    resultText.style.display = "block"; 
 
     function tableCreate(label, score){
         // clean up the old table
@@ -152,8 +159,8 @@ inpFile.addEventListener("change", function() {
     const file = this.files[0];
 
     if(file){
-        document.getElementById("resultText").style.display = "none";
-        document.getElementById("resultText").innerHTML = `Running prediction ...`;
+        resultText.style.display = "none";
+        resultText.innerHTML = `Running prediction ...`;
         resultTable.style.display = "none";
 
         console.log("Using model: " + model);
@@ -177,7 +184,7 @@ inpFile.addEventListener("change", function() {
         previewImage.style.display = null;
         previewImage.setAttribute("src", "");
         resultTable.style.display = "none";
-        document.getElementById("resultText").style.display = "none";
+        resultText.style.display = "none";
     }
 
     console.log(file)
