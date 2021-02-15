@@ -27,6 +27,9 @@ app.config['SECRET_KEY'] = os.urandom(24)
 basedir = os.path.abspath(os.path.dirname(__file__))
 uploadDir = os.path.join(basedir, 'static/uploads') 
 
+if not os.path.exists(uploadDir):
+    os.makedirs(uploadDir) 
+
 def address(filename): 
     
     uploadpath = os.path.join(uploadDir, filename)
@@ -58,9 +61,10 @@ def post_image():
     # function to process uploaded image
     app.logger.info('Processing uploaded image')
 
-    f = request.files['file']
-    if not os.path.exists(uploadDir):
-            os.makedirs(uploadDir) 
+    try:
+        f = request.files['file']
+    except:
+        f = None
     if f:
         filename = f.filename
         if filename.split('.')[-1] in supported_types:

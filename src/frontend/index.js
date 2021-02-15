@@ -10,12 +10,14 @@ var data;
 function updateModelPickedList(){
     model_pick_elements = document.getElementsByClassName("model_pick");
     var dropdown_btn_element = document.getElementById("modelDropdownBtn");
+    // add callback for each model
     for(var i = 0; i < model_pick_elements.length; i++){
         var model_pick_element = model_pick_elements[i];
         model_pick_element.addEventListener("click",  function() {
             var value = this.text;
             console.log("Model picked " + value);
             model = value;
+            // update the dropdown button text to the model name
             dropdown_btn_element.innerHTML = value;
             imageUploadContainer.style.display = "block";
             // reset image if a different model is chosen
@@ -47,8 +49,8 @@ function populateModelList(model_list){
 }
 
 // Get model list
-const fetchModelList = async () => {
-    const response = await fetch('http://127.0.0.1:5000/list_model',{
+async function fetchModelList(){
+    await fetch('http://127.0.0.1:5000/list_model',{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -56,12 +58,12 @@ const fetchModelList = async () => {
             'Origin': 'http://localhost:5500/'
             }
     })
-    .then((response) => response.json())
+    .then(response => response.json())
     .then((responseData) => {
           console.log(responseData);
           populateModelList(responseData);
         })
-        .catch(error => console.warn(error));
+    .catch(error => console.warn(error));
 }
 
 fetchModelList();
@@ -91,8 +93,9 @@ const previewImage = previewContainer.querySelector(".image_preview_image");
 const previewDefaultText = previewContainer.querySelector(".image_preview_default_text");
 
 function uploadImage() {
-    const postImage = async() => {
-        const response = await fetch('http://127.0.0.1:5000/post_image',{
+
+    async function postImage(){
+        await fetch('http://127.0.0.1:5000/post_image',{
             method: 'POST',
             body : data,
             headers: {
@@ -100,6 +103,7 @@ function uploadImage() {
                 'Origin': 'http://localhost:5500/'
             }
         })
+        // promise API, like a callback function executed when server responds
         .then(function(response) {
             if (response.status !== 200){
                 response.json().then(function(body){
@@ -119,6 +123,7 @@ function uploadImage() {
             }
         });
     }
+
     postImage();
 
     resultText.style.display = "block"; 
@@ -159,6 +164,7 @@ inpFile.addEventListener("change", function() {
     const file = this.files[0];
 
     if(file){
+        // first hide result text and table
         resultText.style.display = "none";
         resultText.innerHTML = `Running prediction ...`;
         resultTable.style.display = "none";
@@ -176,7 +182,6 @@ inpFile.addEventListener("change", function() {
             data.append('model_name', model);
             data.append('file', file);
         });
-
         reader.readAsDataURL(file);
     }
     else{
