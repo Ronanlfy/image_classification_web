@@ -190,6 +190,9 @@ inpFile.addEventListener("change", function() {
         previewImage.setAttribute("src", "");
         resultTable.style.display = "none";
         resultText.style.display = "none";
+
+        data = new FormData();
+        data.append('model_name', model);
     }
 
     console.log(file)
